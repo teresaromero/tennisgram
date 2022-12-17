@@ -7,7 +7,6 @@ const main = async () => {
         const bot = BotEngine.getInstance(config.TELEGRAM_API_KEY)
         await bot.init()
     } catch (err) {
-        BotEngine.errHandler(err)
         process.exit(1)
     }
 }

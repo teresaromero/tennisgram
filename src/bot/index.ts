@@ -1,4 +1,4 @@
-import { Bot, GrammyError, HttpError } from "grammy";
+import { Bot, BotError, GrammyError, HttpError } from "grammy";
 
 class BotEngine {
     private static instance: BotEngine
@@ -15,7 +15,8 @@ class BotEngine {
         return this.instance
     }
 
-    public static errHandler(err: Error) {
+
+    private errHandler = (err: BotError) => {
         if (err instanceof GrammyError) {
             console.error("Error in request:", err.description);
         } else if (err instanceof HttpError) {
@@ -23,10 +24,13 @@ class BotEngine {
         } else {
             console.error("Unknown error:", err);
         }
+        throw err
     }
 
     async init() {
-        await this.bot.start()
+        await this.bot
+            .start()
+            .catch((err: BotError) => this.errHandler(err))
     }
 }
 

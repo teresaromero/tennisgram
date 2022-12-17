@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "description": "",
   "main": "app.js",
+  "engines": {
+    "node": ">=19.3.0"
+  },
   "scripts": {
     "start": "node dist/app.js",
     "dev": "nodemon",
@@ -18,6 +21,7 @@
   },
   "dependencies": {
     "@types/node": "^18.11.11",
+    "@types/node-fetch": "^2.6.2",
     "dotenv": "^16.0.3",
     "grammy": "^1.12.0"
   }

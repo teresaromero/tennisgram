@@ -1,30 +1,33 @@
-import { Bot } from "grammy";
+import { Bot, GrammyError, HttpError } from "grammy";
 
+class BotEngine {
+    private static instance: BotEngine
+    private bot: Bot
 
-// InitBot initializes the bot engine
-const InitBot = async (token: string): Promise<void> => {
+    private constructor(token: string) {
+        this.bot = new Bot(token)
+    }
 
-    const bot = new Bot(token);
+    public static getInstance(token: string): BotEngine {
+        if (!this.instance) {
+            this.instance = new BotEngine(token);
+        }
+        return this.instance
+    }
 
-    // Handle the /start command.
-    bot.command("start", (ctx) => ctx.reply("Welcome! Up and running."));
+    public static errHandler(err: Error) {
+        if (err instanceof GrammyError) {
+            console.error("Error in request:", err.description);
+        } else if (err instanceof HttpError) {
+            console.error("Could not contact Telegram:", err);
+        } else {
+            console.error("Unknown error:", err);
+        }
+    }
 
-    // Handle the /start command.
-    bot.command("nuevopartido", (ctx) => {
-        const from = ctx.msg.from
-        const msg = ctx.msg
-        console.log(msg.text)
-
-        return ctx.reply(`gracias ${from.first_name}`)
-    });
-
-    bot.on("message", (ctx) => ctx.reply("Hola default"));
-
-    bot.catch(err => {
-        throw err
-    })
-
-    return bot.start()
+    async init() {
+        await this.bot.start()
+    }
 }
 
-export default InitBot
+export { BotEngine }

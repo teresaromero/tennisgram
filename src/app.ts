@@ -1,9 +1,15 @@
-import Config from "./config"
-import InitBot from './bot'
+import { BotEngine } from './bot'
+import config from './config'
 
-function main(): void {
-    InitBot(Config.TELEGRAM_API_KEY)
+const main = async () => {
+    console.log("starting bot engine...")
+    try {
+        const bot = BotEngine.getInstance(config.TELEGRAM_API_KEY)
+        await bot.init()
+    } catch (err) {
+        BotEngine.errHandler(err)
+        process.exit(1)
+    }
 }
-
 
 main()

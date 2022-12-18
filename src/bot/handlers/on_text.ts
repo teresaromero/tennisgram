@@ -17,9 +17,9 @@ export const OnTextHandler = async (ctx: Context) => {
 
     await UpdateMatch(pendingMatch)
     const msg = `Perfecto! hemos terminado, aqui te dejo un resumen del partido:
-    - Dia: ${pendingMatch.date}\n- Lugar: ${pendingMatch.location || ""}
-    - Jugadores: ${pendingMatch.players.map(p => p.name).join(",")}
-    - Plazas disponibles: ${pendingMatch.seats - 1}
-    - Notas: ${pendingMatch.notes || ""}`
+- Dia: ${pendingMatch.date}\n- Lugar: ${pendingMatch.location || ""}
+- Jugadores: ${pendingMatch.players.map(p => p.name).join(",")}
+- Plazas disponibles: ${pendingMatch.seats - 1}
+- Notas: ${pendingMatch.notes || ""}`
     await ctx.reply(msg)
 }

@@ -4,7 +4,7 @@ export interface Match {
     meta: Meta
     notes: string | undefined
     date: number | undefined
-    location: string | undefined
+    place: string | undefined
     seats: number | undefined
     players: Player[] | undefined
 }

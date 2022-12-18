@@ -1,7 +1,7 @@
 import { Context } from "grammy"
 import { ReadMatchByUID, UpdateMatch } from "../../storage/matches/crud"
 import { Match } from "../../storage/matches/interfaces"
-import { AskForNotes } from "../input/notes"
+import { AskForPlace } from "../input/place"
 import { SeatsOptionPrefix } from "../input/seats"
 
 export const SeatsOptionCallbackRegex = new RegExp(`^${SeatsOptionPrefix}`)
@@ -27,6 +27,5 @@ export const SeatsCallbackHandler = async (ctx: Context) => {
     // edit the message to keep response
     await ctx.editMessageText(`${ctx.msg.text} \nGuardado: ${seats}`)
 
-    await AskForNotes(ctx)
-    // await AskForLocation(ctx, match.UID)
+    await AskForPlace(ctx)
 }

@@ -1,6 +1,8 @@
 import { Bot, BotError, GrammyError, HttpError } from "grammy";
+import { EnrollCallbackHandler, EnrollOptionCallbackRegex } from "./handlers/callback_enroll";
 import { ScheduleCallbackHandler, ScheduleOptionCallbackRegex } from "./handlers/callback_schedule";
 import { SeatsCallbackHandler, SeatsOptionCallbackRegex } from "./handlers/callback_seats";
+import { EnrollCommandDescription, EnrollCommandHandler, EnrollCommandKeyword } from "./handlers/command_enroll";
 import { PartidoCommandDescription, PartidoCommandHandler, PartidoCommandKeyword } from "./handlers/command_partido";
 import { OnTextHandler } from "./handlers/on_text";
 
@@ -46,12 +48,15 @@ class BotEngine {
         // set the description for all the commands
         this.bot.api.setMyCommands([
             { command: PartidoCommandKeyword, description: PartidoCommandDescription },
+            { command: EnrollCommandKeyword, description: EnrollCommandDescription }
         ])
 
         this.bot.command(PartidoCommandKeyword, PartidoCommandHandler)
+        this.bot.command(EnrollCommandKeyword, EnrollCommandHandler)
 
         this.bot.callbackQuery(ScheduleOptionCallbackRegex, ScheduleCallbackHandler)
         this.bot.callbackQuery(SeatsOptionCallbackRegex, SeatsCallbackHandler)
+        this.bot.callbackQuery(EnrollOptionCallbackRegex, EnrollCallbackHandler)
 
         // handle input text to finalize or reply
         this.bot.on(":text", OnTextHandler)

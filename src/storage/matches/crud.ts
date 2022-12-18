@@ -47,6 +47,12 @@ export const ReadMatchesPedingToResolve = async (chatID: number): Promise<Match>
     return all.find(m => (!m.meta.created && m.meta.chatID === chatID))
 }
 
+// ReadAvailableMatches returns a list of matches with seats available
+export const ReadAvailableMatches = async (): Promise<Match[]> => {
+    const all = await readAllMatches()
+    return all.filter(m => m.seats > m.players.length)
+}
+
 // DeleteMatchByUID: not yet implemented
 export const DeleteMatchByUID = async (_: string): Promise<void> => { }
 

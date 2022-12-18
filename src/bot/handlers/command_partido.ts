@@ -1,6 +1,6 @@
 import { Context } from "grammy";
-import { saveMatch } from "../../storage";
-import { Match, Player } from "../../storage/interfaces";
+import { CreateMatch } from "../../storage/matches/crud";
+import { Match, Player } from "../../storage/matches/interfaces";
 import { AskForSchedule } from "../input/schedule";
 
 export const PartidoCommandKeyword = "partido"
@@ -14,12 +14,14 @@ export const PartidoCommandHandler = async (ctx: Context) => {
     const matchID = `${user.id}${ctx.message.message_id}`
     const match: Partial<Match> = {
         UID: matchID,
-        createdAt: Date.now(),
-        createdBy: user,
-        chatID: ctx.chat.id,
-        players: [user]
-        
+        players: [user],
+        meta: {
+            createdAt: Date.now(),
+            chatID: ctx.chat.id,
+            createdBy: user,
+            created: false
+        }
     }
-    await saveMatch(match)
+    await CreateMatch(match)
     await AskForSchedule(ctx, matchID)
 }

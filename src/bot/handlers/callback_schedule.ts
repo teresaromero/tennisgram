@@ -1,6 +1,6 @@
 import { Context } from "grammy"
-import { getMatchByID, updateMatch } from "../../storage"
-import { Match } from "../../storage/interfaces"
+import { ReadMatchByUID, UpdateMatch } from "../../storage/matches/crud"
+import { Match } from "../../storage/matches/interfaces"
 import { ScheduleOptionPrefix } from "../input/schedule"
 import { AskForSeats } from "../input/seats"
 
@@ -14,12 +14,12 @@ export const ScheduleCallbackHandler = async (ctx: Context) => {
 
     // lookup matchID and save date
     const [_, selectedDate, matchID] = data.split("-", 3)
-    const match: Match = await getMatchByID(matchID)
+    const match: Match = await ReadMatchByUID(matchID)
     if (!match) {
         // reply: Match not found
     }
     match.date = parseInt(selectedDate)
-    await updateMatch(match)
+    await UpdateMatch(match)
 
     // edit the message to keep response
     await ctx.editMessageText(`${ctx.msg.text} \nGuardado: ${new Date(match.date).toDateString()}`)

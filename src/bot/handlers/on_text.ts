@@ -1,21 +1,21 @@
 import { Context } from "grammy"
-import { getPendingMatchFromChat, updateMatch } from "../../storage"
+import { ReadMatchesPedingToResolve, UpdateMatch } from "../../storage/matches/crud"
 
 export const OnTextHandler = async (ctx: Context) => {
-    const pendingMatch = await getPendingMatchFromChat(ctx.chat.id)
+    const pendingMatch = await ReadMatchesPedingToResolve(ctx.chat.id)
     if (!pendingMatch) {
         await ctx.reply("No tienes nada pendiente. Inicia un nuevo registro usando el comando partido")
         return
     }
     const text = ctx.message.text
     if (text === "finalizar") {
-        pendingMatch.created = true
+        pendingMatch.meta.created = true
     } else {
-        pendingMatch.created = true
+        pendingMatch.meta.created = true
         pendingMatch.notes = text
     }
 
-    await updateMatch(pendingMatch)
+    await UpdateMatch(pendingMatch)
     const msg = `Perfecto! hemos terminado, aqui te dejo un resumen del partido:
     - Dia: ${pendingMatch.date}\n- Lugar: ${pendingMatch.location || ""}
     - Jugadores: ${pendingMatch.players.map(p => p.name).join(",")}

@@ -1,6 +1,6 @@
 import { Context } from "grammy"
-import { getMatchByID, updateMatch } from "../../storage"
-import { Match } from "../../storage/interfaces"
+import { ReadMatchByUID, UpdateMatch } from "../../storage/matches/crud"
+import { Match } from "../../storage/matches/interfaces"
 import { AskForNotes } from "../input/notes"
 import { SeatsOptionPrefix } from "../input/seats"
 
@@ -13,7 +13,7 @@ export const SeatsCallbackHandler = async (ctx: Context) => {
     await ctx.editMessageReplyMarkup({ reply_markup: { inline_keyboard: [] } })
 
     const [_, selectedSeats, matchID] = data.split("-", 3)
-    const match: Match = await getMatchByID(matchID)
+    const match: Match = await ReadMatchByUID(matchID)
     if (!match) {
         // reply: Match not found
     }
@@ -22,7 +22,7 @@ export const SeatsCallbackHandler = async (ctx: Context) => {
         // reply: Invalid seat number
     }
     match.seats = seats
-    await updateMatch(match)
+    await UpdateMatch(match)
 
     // edit the message to keep response
     await ctx.editMessageText(`${ctx.msg.text} \nGuardado: ${seats}`)

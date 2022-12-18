@@ -1,11 +1,26 @@
 import { Bot, BotError, GrammyError, HttpError } from "grammy";
+import { ScheduleCallbackHandler, ScheduleOptionCallbackRegex } from "./handlers/callback_schedule";
+import { SeatsCallbackHandler, SeatsOptionCallbackRegex } from "./handlers/callback_seats";
+import { PartidoCommandDescription, PartidoCommandHandler, PartidoCommandKeyword } from "./handlers/command_partido";
+import { OnTextHandler } from "./handlers/on_text";
 
 class BotEngine {
     private static instance: BotEngine
     private bot: Bot
 
     private constructor(token: string) {
-        this.bot = new Bot(token)
+        this.bot = new Bot(token, {
+            botInfo: {
+                is_bot: true,
+                can_join_groups: true,
+                can_read_all_group_messages: false,
+                supports_inline_queries: false,
+                id: 1,
+                first_name: "",
+                username: "myusername"
+            }
+
+        })
     }
 
     public static getInstance(token: string): BotEngine {
@@ -27,7 +42,31 @@ class BotEngine {
         throw err
     }
 
+    private async loadCommands() {
+        // set the description for all the commands
+        this.bot.api.setMyCommands([
+            { command: PartidoCommandKeyword, description: PartidoCommandDescription },
+        ])
+
+        this.bot.command(PartidoCommandKeyword, PartidoCommandHandler)
+
+        this.bot.callbackQuery(ScheduleOptionCallbackRegex, ScheduleCallbackHandler)
+        this.bot.callbackQuery(SeatsOptionCallbackRegex, SeatsCallbackHandler)
+
+        // handle input text to finalize or reply
+        this.bot.on(":text", OnTextHandler)
+
+        // handle any unknown callback query
+        this.bot.on("callback_query:data", async (ctx) => {
+            console.log("Unknown button event with payload", ctx.callbackQuery.data);
+            await ctx.answerCallbackQuery(); // remove loading animation
+        });
+
+    }
+
     async init() {
+        this.loadCommands()
+        this.bot.catch(e => this.errHandler(e))
         await this.bot
             .start()
             .catch((err: BotError) => this.errHandler(err))

@@ -16,7 +16,7 @@ export interface User {
 }
 
 // Player represents the participants of a match
-export interface Player extends User { }
+export type Player = User
 
 interface Meta {
     chatID: number

@@ -1,81 +1,39 @@
-import { Bot, BotError, GrammyError, HttpError } from "grammy";
-import { EnrollCallbackHandler, EnrollOptionCallbackRegex } from "./handlers/callback_enroll";
-import { ScheduleCallbackHandler, ScheduleOptionCallbackRegex } from "./handlers/callback_schedule";
-import { SeatsCallbackHandler, SeatsOptionCallbackRegex } from "./handlers/callback_seats";
-import { EnrollCommandDescription, EnrollCommandHandler, EnrollCommandKeyword } from "./handlers/command_enroll";
-import { PartidoCommandDescription, PartidoCommandHandler, PartidoCommandKeyword } from "./handlers/command_partido";
-import { OnTextHandler } from "./handlers/on_text";
+import { Bot, BotConfig, BotError, Context } from "grammy";
+import handlers from "./handlers"
 
-class BotEngine {
-    private static instance: BotEngine
-    private bot: Bot
+const defaultConfig: BotConfig<Context> = {}
 
-    private constructor(token: string) {
-        this.bot = new Bot(token, {
-            botInfo: {
-                is_bot: true,
-                can_join_groups: true,
-                can_read_all_group_messages: false,
-                supports_inline_queries: false,
-                id: 1,
-                first_name: "",
-                username: "myusername"
-            }
+// create returns an instance of bot with the given config and token
+// token must be asked to BotFather
+const create = (token: string, config: BotConfig<Context>): Bot => new Bot(token, config)
 
-        })
-    }
+// Init creates a bot instance and starts listening
+const Init = async (token: string, config?: BotConfig<Context>): Promise<void> => {
 
-    public static getInstance(token: string): BotEngine {
-        if (!this.instance) {
-            this.instance = new BotEngine(token);
-        }
-        return this.instance
-    }
+    // create new bot
+    const bot = create(token, config || defaultConfig)
 
+    await bot.api.setMyCommands([
+        { command: "start", description: "description" }
+    ])
 
-    private errHandler = (err: BotError) => {
-        if (err instanceof GrammyError) {
-            console.error("Error in request:", err.description);
-        } else if (err instanceof HttpError) {
-            console.error("Could not contact Telegram:", err);
-        } else {
-            console.error("Unknown error:", err);
-        }
-        throw err
-    }
+    // commands start & help
+    bot.command("start", ctx => {
+        ctx
+        
+        ctx.reply("gracias", { reply_to_message_id: ctx.msg.message_id })})
+    // bot.command("help", ctx => ctx.reply("gracias"))
 
-    private async loadCommands() {
-        // set the description for all the commands
-        this.bot.api.setMyCommands([
-            { command: PartidoCommandKeyword, description: PartidoCommandDescription },
-            { command: EnrollCommandKeyword, description: EnrollCommandDescription }
-        ])
+    // unknown commands
+    bot.on("msg::bot_command", ctx => ctx.reply("lalal"))
 
-        this.bot.command(PartidoCommandKeyword, PartidoCommandHandler)
-        this.bot.command(EnrollCommandKeyword, EnrollCommandHandler)
+    // catch bot errors while running
+    bot.catch(e => handlers.error(e))
 
-        this.bot.callbackQuery(ScheduleOptionCallbackRegex, ScheduleCallbackHandler)
-        this.bot.callbackQuery(SeatsOptionCallbackRegex, SeatsCallbackHandler)
-        this.bot.callbackQuery(EnrollOptionCallbackRegex, EnrollCallbackHandler)
-
-        // handle input text to finalize or reply
-        this.bot.on(":text", OnTextHandler)
-
-        // handle any unknown callback query
-        this.bot.on("callback_query:data", async (ctx) => {
-            console.log("Unknown button event with payload", ctx.callbackQuery.data);
-            await ctx.answerCallbackQuery(); // remove loading animation
-        });
-
-    }
-
-    async init() {
-        this.loadCommands()
-        this.bot.catch(e => this.errHandler(e))
-        await this.bot
-            .start()
-            .catch((err: BotError) => this.errHandler(err))
-    }
+    // start bot and catch any start error
+    return bot
+        .start()
+        .catch((err: BotError) => handlers.error(err))
 }
 
-export { BotEngine }
+export default { Init }
